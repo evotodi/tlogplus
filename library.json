@@ -1,0 +1,24 @@
+{
+  "name": "TLog Plus",
+  "version": "1.0.0",
+  "description": "Allows for sending the logging data to not just the serial port; but to T-Junction off to a wider range of other streams; such as a telnet service you can telnet to, sending it out on MQTT, see it scroll in a webbrowser, or to a syslog service.",
+  "keywords": "logging, communication",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/evotodi/tee-log-plus"
+  },
+  "authors": [
+    {
+      "name": "Evotodi"
+    },
+    {
+      "name": "dirkx@webweaving.org"
+    }
+  ],
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/evotodi/tee-log-plus",
+  "dependencies": {
+    "WebServer": "~2.0.0",
+    "knolleary/PubSubClient": "~2.8"
+  }
+}

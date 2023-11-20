@@ -19,15 +19,15 @@
 
 #ifndef _H_TELNET_LOGTEE
 #define _H_TELNET_LOGTEE
-#if (defined(ESP32) || defined(ESP8266))
 
-#include <TLog.h>
+#include <TLogPlus.h>
 
 #ifndef MAX_SERIAL_TELNET_CLIENTS
 #define MAX_SERIAL_TELNET_CLIENTS (4)
 #endif
 
 class TelnetSerialStream : public TLog {
+    typedef void (*CallbackFunction)(String str);
   public:
     TelnetSerialStream(const uint16_t telnetPort = 23, const uint16_t maxClients = MAX_SERIAL_TELNET_CLIENTS) : _telnetPort(telnetPort), _maxClients(maxClients) {};
     ~TelnetSerialStream();
@@ -37,12 +37,30 @@ class TelnetSerialStream : public TLog {
     virtual void loop();
     virtual void stop();
 
+//    CallbackFunction on_connect = NULL;
+//    CallbackFunction on_reconnect = NULL;
+//    CallbackFunction on_disconnect = NULL;
+//    CallbackFunction on_connection_attempt = NULL;
+    CallbackFunction on_input = NULL;
+
+//    void onConnect(CallbackFunction f);
+//    void onConnectionAttempt(CallbackFunction f);
+//    void onReconnect(CallbackFunction f);
+//    void onDisconnect(CallbackFunction f);
+    void onInputReceived(CallbackFunction f);
+
+    bool isLineModeSet();
+    void setLineMode(bool value = true);
+    void handleInput(unsigned char c);
+
   private:
     uint16_t _telnetPort, _maxClients;
     WiFiServer * _server = NULL;
     WiFiClient ** _serverClients;
+
   protected:
+    String input = "";
+    bool _lineMode = true;
 };
-#endif
 #endif
 

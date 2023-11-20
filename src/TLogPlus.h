@@ -22,81 +22,95 @@
 
 #include <Arduino.h>
 #include <Print.h>
-
 #include <stddef.h>
 #include <memory>
 #include <vector>
 #include <functional>
 
-#ifdef ESP32
-#include <WiFi.h>
-#include <ESPmDNS.h>
-#define IDENTIFIER_GENERATOR (WiFi.macAddress())
-#endif
-
-#ifdef ESP8266
-#include <ESP8266WiFi.h>
-#include <ESP8266mDNS.h>
-#include <WiFiUdp.h>
-#define IDENTIFIER_GENERATOR (WiFi.macAddress())
+#if defined(ESP32)
+#  include <WiFi.h>
+#  ifdef MDNS
+#    include <ESPmDNS.h>
+#  endif
+#  define IDENTIFIER_GENERATOR (WiFi.macAddress())
+#elif defined(ESP8266)
+#  include <ESP8266WiFi.h>
+#  ifdef MDNS
+#    include <ESP8266mDNS.h>
+#  endif
+#  include <WiFiUdp.h>
+#  define IDENTIFIER_GENERATOR (WiFi.macAddress())
+#else
+#  error "Must be ESP32 or ESP8266"
 #endif
 
 #ifndef IDENTIFIER_GENERATOR
-#define IDENTIFIER_GENERATOR "unknown"
+#  define IDENTIFIER_GENERATOR "unknown"
 #endif
 
 class LOGBase : public Print {
 public:
     LOGBase(String identifier = IDENTIFIER_GENERATOR) : _identifier(identifier) {};
+
     String identifier() { return _identifier; };
+
     void setIdentifier(String identifier) { _identifier = identifier; };
+
     virtual void begin() { return; };
+
     virtual void reconnect() { return; };
+
     virtual void loop() { return; };
+
     virtual void stop() { return; };
 
 protected:
     String _identifier;
 };
 
-class TLog : public LOGBase
-{
-  public:
+class TLog : public LOGBase {
+public:
     void disableSerial(bool onoff) { _disableSerial = onoff; };
+
     //void addPrintStream2(const LOGBase * _handler) { addPrintStream(std::make_shared<LOGBase>(_handler)); }
-    void addPrintStream(const std::shared_ptr<LOGBase> &_handler) {
-      auto it = find(handlers.begin(), handlers.end(), _handler);
-      if ( handlers.end() == it)
-        // we're not using push_back; that copies; but use a reference. 
-        // As it can see reuse.
-        handlers.emplace_back(_handler); 
+    void addPrintStream(const std::shared_ptr <LOGBase> &_handler) {
+        auto it = find(handlers.begin(), handlers.end(), _handler);
+        if (handlers.end() == it)
+            // we're not using push_back; that copies; but use a reference.
+            // As it can see reuse.
+            handlers.emplace_back(_handler);
     };
+
     virtual void begin() {
-      for (auto it = handlers.begin(); it != handlers.end(); ++it) {
-        (*it)->begin();
-      }
-      // MDNS.begin();
+        for (auto it = handlers.begin(); it != handlers.end(); ++it) {
+            (*it)->begin();
+        }
+        // MDNS.begin();
     };
+
     virtual void loop() {
         for (auto it = handlers.begin(); it != handlers.end(); ++it) {
-          (*it)->loop();
-      }
+            (*it)->loop();
+        }
     };
+
     virtual void stop() {
-      for (auto it = handlers.begin(); it != handlers.end(); ++it) {
-        (*it)->stop();
-      }
+        for (auto it = handlers.begin(); it != handlers.end(); ++it) {
+            (*it)->stop();
+        }
     };
+
     size_t write(byte a) {
-      for (auto it = handlers.begin(); it != handlers.end(); ++it) {
-        (*it)->write(a);
-      }
-      if (_disableSerial)
-          return 1;
-      return Serial.write(a);
+        for (auto it = handlers.begin(); it != handlers.end(); ++it) {
+            (*it)->write(a);
+        }
+        if (_disableSerial)
+            return 1;
+        return Serial.write(a);
     }
-  private:
-    std::vector<std::shared_ptr<LOGBase>> handlers;
+
+private:
+    std::vector <std::shared_ptr<LOGBase>> handlers;
     bool _disableSerial = false;
 };
 

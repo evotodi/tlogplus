@@ -17,10 +17,9 @@
  * telnetserver, a webserver, syslog or MQTT.
  */
 
-#include "TLog.h"
+#ifdef MQTT
+#include "TLogPlus.h"
 #include "MqttlogStream.h"
-
-#if (defined(ESP32) || defined(ESP8266))
 #include <PubSubClient.h>
 
 void MqttStream::begin() {

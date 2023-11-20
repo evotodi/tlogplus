@@ -17,15 +17,13 @@
  * telnetserver, a webserver, syslog or MQTT.
  */
 
-#include "TLog.h"
+#include "TLogPlus.h"
 #include "SyslogStream.h"
-
-#if (defined(ESP32) || defined(ESP8266))
 
 size_t SyslogStream::write(uint8_t c) {
 
   if (at >= sizeof(logbuff) - 1) {
-    Log.println("Purged logbuffer (should never happen)");
+    Log.println("Purged log buffer (should never happen)");
     at = 0;
   };
 
@@ -65,4 +63,3 @@ size_t SyslogStream::write(uint8_t c) {
   };
   return 1;
 }
-#endif

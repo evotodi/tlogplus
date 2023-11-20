@@ -17,7 +17,7 @@
  * telnetserver, a webserver, syslog or MQTT.
  */
 
-#include "TLog.h"
+#include "TLogPlus.h"
 
 TLog Log, Debug;
 

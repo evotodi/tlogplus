@@ -17,10 +17,8 @@
  * telnetserver, a webserver, syslog or MQTT.
  */
 
-#include "TLog.h"
+#include "TLogPlus.h"
 #include "TelnetSerialStream.h"
-
-#if (defined(ESP32) || defined(ESP8266))
 
 size_t TelnetSerialStream::write(uint8_t c) {
   if (!_server)
@@ -64,7 +62,9 @@ void TelnetSerialStream::begin() {
     _serverClients[i] = NULL;
 
   Log.printf("Opened serial server on telnet://%s:%d\n", WiFi.localIP().toString().c_str(), _telnetPort);
+#ifdef MDNS
   MDNS.addService("telnet", "tcp", _telnetPort);
+#endif
 };
 
 void TelnetSerialStream::stop() {
@@ -101,9 +101,9 @@ void TelnetSerialStream::loop() {
 
         _serverClients[i]->print("Telnet connection");
         if (identifier().length()) {
-	        _serverClients[i]->print(" to ");
-	        _serverClients[i]->print(identifier());
-	};
+            _serverClients[i]->print(" to ");
+            _serverClients[i]->print(identifier());
+    };
         _serverClients[i]->println();
 
         Log.print(_serverClients[i]->remoteIP());
@@ -129,7 +129,7 @@ void TelnetSerialStream::loop() {
       Log.print(_serverClients[i]->remoteIP());
       Log.print(":");
       Log.print(_serverClients[i]->remotePort());
-      Log.println(" closed the conenction.");
+      Log.println(" closed the connection.");
       _serverClients[i]->stop();
       delete _serverClients[i];
       _serverClients[i] = NULL;
@@ -138,13 +138,52 @@ void TelnetSerialStream::loop() {
 
     if (!_serverClients[i]->available())
       continue;
-
-    while (_serverClients[i]->available()) {
-      unsigned char c = _serverClients[i]->read();
-      if (c > 0 && c < 32) {
-        // Serial.println("Ignoring telnet input");
-      };
-    };
+    if(on_input) {
+        while (_serverClients[i]->available()) {
+            unsigned char c = _serverClients[i]->read();
+            handleInput(c);
+        }
+    } else {
+        unsigned char c = _serverClients[i]->read();
+        if (c > 0 && c < 32) {
+             Serial.println("Ignoring telnet input");
+        };
+    }
   }
 }
-#endif
+
+bool TelnetSerialStream::isLineModeSet() {
+    return _lineMode;
+}
+
+void TelnetSerialStream::setLineMode(bool value /* = true */) {
+    _lineMode = value;
+}
+
+void TelnetSerialStream::onInputReceived(CallbackFunction f) {
+    on_input = f;
+}
+
+void TelnetSerialStream::handleInput(unsigned char c) {
+
+    // collect string
+    if (_lineMode) {
+        if (c != '\n') {
+            if (c >= 32 && c < 127) {
+                input += c;
+            }
+            // EOL -> send input
+        } else {
+            on_input(input);
+            input = "";
+        }
+        // send individual characters
+    } else {
+        if (input.length()) {
+            on_input(input + String(c));
+            input = "";
+        } else {
+            on_input(String(c));
+        }
+    }
+}

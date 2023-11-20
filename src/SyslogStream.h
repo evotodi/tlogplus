@@ -21,7 +21,7 @@
 #define _H_SyslogStream
 
 #include <Print.h>
-#include <TLog.h>
+#include <TLogPlus.h>
 
 class SyslogStream : public TLog {
   public:

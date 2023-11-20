@@ -17,10 +17,8 @@
  * telnetserver, a webserver, syslog or MQTT.
  */
 
-#include "TLog.h"
+#include "TLogPlus.h"
 #include "WebSerialStream.h"
-
-#if (defined(ESP32) || defined(ESP8266))
 
 size_t WebSerialStream::write(uint8_t c) {
   _buff[_at % sizeof(_buff)] = c;
@@ -103,7 +101,9 @@ void WebSerialStream::begin() {
   _server->begin();
 
   Log.printf("Opened serial web server on http://%s:%d\n", WiFi.localIP().toString().c_str(), _webPort);
+#ifdef MDNS
   MDNS.addService("http", "tcp", _webPort);
+#endif
 };
 
 void WebSerialStream::stop() {
@@ -118,4 +118,3 @@ void WebSerialStream::loop() {
   if (_server)
  	_server->handleClient();
 }
-#endif

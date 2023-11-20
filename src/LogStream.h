@@ -20,7 +20,7 @@
 #ifndef _H_TELNET_LOGSTREAM
 #define _H_TELNET_LOGSTREAM
 
-#include <TLog.h>
+#include <TLogPlus.h>
 #include <Stream.h>
 
 class LogStream : public TLog {

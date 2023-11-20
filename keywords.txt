@@ -7,6 +7,7 @@
 #######################################
 Log KEYWORD1
 TLog KEYWORD1
+TLogPlus KEYWORD1
  
 #######################################
 # KEYWORD2 Methods and functions

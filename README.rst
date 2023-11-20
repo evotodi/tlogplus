@@ -1,4 +1,4 @@
-Tee Logger
+Tee Logger Plus
 
 A logger that acts as a fan-out or tee; i.e. lets you sent the logs to the Serial port, but also
 to (for example) SYSLOG, a local server you can 'telnet' into or make it scroll in a browser window.
@@ -39,3 +39,9 @@ Note that you can still stream to the indivudal loggers; e.g. in above example
 works too. Or see the Serial1/Serial2 example.
 
 It is used at the https://makerspaceleiden.nl/ for its door access: https://github.com/makerspaceleiden.
+
+
+
+Define MDNS to use MDNS
+Define MQTT to enable MQTT and include knolleary/PubSubClient@~2.8 in project
+

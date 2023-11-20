@@ -19,9 +19,8 @@
 
 #ifndef _H_WEBSERVER_TEE_LOG
 #define _H_WEBSERVER_TEE_LOG
-#if (defined(ESP32) || defined(ESP8266))
 
-#include <TLog.h>
+#include <TLogPlus.h>
 
 #ifdef ESP32
 #include <WiFi.h>
@@ -53,5 +52,3 @@ class WebSerialStream : public TLog {
   protected:
 };
 #endif
-#endif
-
