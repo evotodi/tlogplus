@@ -1,2 +1,8 @@
 /.pio/
 /platformio.ini
+/README.rst
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/.gitignore
+/.idea/deployment.xml
+/.idea/misc.xml
+/.idea/vcs.xml
