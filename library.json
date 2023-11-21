@@ -1,6 +1,6 @@
 {
   "name": "TLogPlus",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "ESP8266/ESP32 Library that works like linux tee allowing you to log to multiple places at one time. Lets you sent logs to the Serial port, Telnet client, Syslog server, or a local web server that will scroll in a browser window.",
   "keywords": "logging, communication",
   "repository": {
@@ -21,5 +21,5 @@
   "dependencies": {
   },
   "platforms": ["espressif8266", "espressif32"],
-  "headers": ["TLog.h", "EscapeCodes.h"]
+  "headers": ["TLog.h"]
 }
