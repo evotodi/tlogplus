@@ -1,4 +1,4 @@
 #include "TLogPlus.h"
-
-TLog Log, Debug;
-
+namespace TLogPlus {
+    TLog Log, Debug;
+}

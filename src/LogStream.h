@@ -3,20 +3,24 @@
 
 #include <TLogPlus.h>
 #include <Stream.h>
+namespace TLogPlusStream {
+    class LogStream : public TLogPlus::TLog {
+    public:
+        LogStream();
 
-class LogStream : public TLog {
-  public:
-    LogStream();
-    LogStream(Stream &s) : _s(&s) {};
+        LogStream(Stream &s) : _s(&s) {};
 
-    void begin() {};
-    void begin(Stream &s) { _s = &s; };
+        void begin() {};
 
-    void loop() {};
-    void stop() {};
+        void begin(Stream &s) { _s = &s; };
 
-  private:
-    Stream * _s;
-  protected:
-};
+        void loop() {};
+
+        void stop() {};
+
+    private:
+        Stream *_s;
+    protected:
+    };
+}
 #endif

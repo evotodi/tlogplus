@@ -16,65 +16,68 @@ typedef ESP8266WebServer WebServer;
 #ifndef MAX_SERIAL_TELNET_CLIENTS
 #  define MAX_SERIAL_TELNET_CLIENTS (4)
 #endif
+namespace TLogPlusStream {
+    class TelnetSerialStream : public TLogPlus::TLog {
+        typedef void (*CallbackFunction)(String str);
 
-class TelnetSerialStream : public TLog {
-    typedef void (*CallbackFunction)(String str);
+        typedef void (*IpCallbackFunction)(IPAddress ipAddress);
 
-    typedef void (*IpCallbackFunction)(IPAddress ipAddress);
-
-public:
-    TelnetSerialStream(const uint16_t telnetPort = 23, const uint16_t maxClients = MAX_SERIAL_TELNET_CLIENTS, bool logTelnetActions = false)
+    public:
+        TelnetSerialStream() {};
+        TelnetSerialStream(const uint16_t telnetPort, const uint16_t maxClients) : _telnetPort(telnetPort), _maxClients(maxClients) {};
+        TelnetSerialStream(bool logTelnetActions) : _logActions(logTelnetActions) {};
+        TelnetSerialStream(const uint16_t telnetPort, const uint16_t maxClients, bool logTelnetActions)
             :
             _telnetPort(telnetPort),
             _maxClients(maxClients),
             _logActions(logTelnetActions) {};
 
-    ~TelnetSerialStream();
+        ~TelnetSerialStream();
 
-    void onConnect(IpCallbackFunction f);
+        void onConnect(IpCallbackFunction f);
 
-    void onDisconnect(IpCallbackFunction f);
+        void onDisconnect(IpCallbackFunction f);
 
-    void onInputReceived(CallbackFunction f);
+        void onInputReceived(CallbackFunction f);
 
-    bool isLineModeSet();
+        bool isLineModeSet();
 
-    void setLineMode(bool value = true);
+        void setLineMode(bool value = true);
 
-    bool isLogActions();
+        bool isLogActions();
 
-    void setLogActions(bool value = true);
+        void setLogActions(bool value = true);
 
-private:
-    uint16_t _telnetPort, _maxClients;
-    WiFiServer *_server = NULL;
-    WiFiClient **_serverClients;
-    bool _logActions;
+    private:
+        uint16_t _telnetPort = 23;
+        uint16_t _maxClients = MAX_SERIAL_TELNET_CLIENTS;
+        WiFiServer *_server = NULL;
+        WiFiClient **_serverClients;
+        bool _logActions = false;
 
-    IpCallbackFunction on_connect = NULL;
-    IpCallbackFunction on_disconnect = NULL;
-    CallbackFunction on_input = NULL;
+        IpCallbackFunction on_connect = NULL;
+        IpCallbackFunction on_disconnect = NULL;
+        CallbackFunction on_input = NULL;
 
-    virtual size_t write(uint8_t c);
+        virtual size_t write(uint8_t c);
 
-    virtual size_t write(uint8_t *buff, size_t len);
+        virtual size_t write(uint8_t *buff, size_t len);
 
-    virtual void begin();
+        virtual void begin();
 
-    virtual void loop();
+        virtual void loop();
 
-    virtual void stop();
+        virtual void stop();
 
-    void _processClientConnection();
+        void _processClientConnection();
 
-    void _handleInput(char c);
+        void _handleInput(char c);
 
-    void _handleClientInput();
+        void _handleClientInput();
 
-protected:
-    String input = "";
-    bool _lineMode = true;
-};
-
+    protected:
+        String input = "";
+        bool _lineMode = true;
+    };
+}
 #endif
-
