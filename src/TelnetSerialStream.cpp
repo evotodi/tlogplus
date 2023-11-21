@@ -140,11 +140,11 @@ void TelnetSerialStream::loop() {
       continue;
     if(on_input) {
         while (_serverClients[i]->available()) {
-            unsigned char c = _serverClients[i]->read();
+            char c = _serverClients[i]->read();
             handleInput(c);
         }
     } else {
-        unsigned char c = _serverClients[i]->read();
+        char c = _serverClients[i]->read();
         if (c > 0 && c < 32) {
              Serial.println("Ignoring telnet input");
         };
@@ -164,7 +164,7 @@ void TelnetSerialStream::onInputReceived(CallbackFunction f) {
     on_input = f;
 }
 
-void TelnetSerialStream::handleInput(unsigned char c) {
+void TelnetSerialStream::handleInput(char c) {
 
     // collect string
     if (_lineMode) {

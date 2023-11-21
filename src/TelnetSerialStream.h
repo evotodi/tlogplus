@@ -51,7 +51,7 @@ class TelnetSerialStream : public TLog {
 
     bool isLineModeSet();
     void setLineMode(bool value = true);
-    void handleInput(unsigned char c);
+    void handleInput(char c);
 
   private:
     uint16_t _telnetPort, _maxClients;
