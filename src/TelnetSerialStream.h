@@ -1,66 +1,80 @@
-/* Copyright 2008, 2012-2022 Dirk-Willem van Gulik <dirkx(at)webweaving(dot)org>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * 
- * Library that provides a fanout, or T-flow; so that output or logs do 
- * not just got to the serial port; but also to a configurable mix of a
- * telnetserver, a webserver, syslog or MQTT.
- */
-
-#ifndef _H_TELNET_LOGTEE
-#define _H_TELNET_LOGTEE
+#ifndef _H_TELNET_LOGTEE_PLUS
+#define _H_TELNET_LOGTEE_PLUS
 
 #include <TLogPlus.h>
 
+#  if defined(ESP32)
+#    include <WebServer.h>
+#  elif defined(ESP8266)
+#    include <ESP8266WebServer.h>
+typedef ESP8266WebServer WebServer;
+#  else
+#    error "Must be ESP32 or ESP8266"
+#  endif
+
+
 #ifndef MAX_SERIAL_TELNET_CLIENTS
-#define MAX_SERIAL_TELNET_CLIENTS (4)
+#  define MAX_SERIAL_TELNET_CLIENTS (4)
 #endif
 
 class TelnetSerialStream : public TLog {
     typedef void (*CallbackFunction)(String str);
-  public:
-    TelnetSerialStream(const uint16_t telnetPort = 23, const uint16_t maxClients = MAX_SERIAL_TELNET_CLIENTS) : _telnetPort(telnetPort), _maxClients(maxClients) {};
+
+    typedef void (*IpCallbackFunction)(IPAddress ipAddress);
+
+public:
+    TelnetSerialStream(const uint16_t telnetPort = 23, const uint16_t maxClients = MAX_SERIAL_TELNET_CLIENTS, bool logTelnetActions = false)
+            :
+            _telnetPort(telnetPort),
+            _maxClients(maxClients),
+            _logActions(logTelnetActions) {};
+
     ~TelnetSerialStream();
-    virtual size_t write(uint8_t c);
-    virtual size_t write(uint8_t * buff, size_t len);
-    virtual void begin();
-    virtual void loop();
-    virtual void stop();
 
-//    CallbackFunction on_connect = NULL;
-//    CallbackFunction on_reconnect = NULL;
-//    CallbackFunction on_disconnect = NULL;
-//    CallbackFunction on_connection_attempt = NULL;
-    CallbackFunction on_input = NULL;
+    void onConnect(IpCallbackFunction f);
 
-//    void onConnect(CallbackFunction f);
-//    void onConnectionAttempt(CallbackFunction f);
-//    void onReconnect(CallbackFunction f);
-//    void onDisconnect(CallbackFunction f);
+    void onDisconnect(IpCallbackFunction f);
+
     void onInputReceived(CallbackFunction f);
 
     bool isLineModeSet();
+
     void setLineMode(bool value = true);
-    void handleInput(char c);
 
-  private:
+    bool isLogActions();
+
+    void setLogActions(bool value = true);
+
+private:
     uint16_t _telnetPort, _maxClients;
-    WiFiServer * _server = NULL;
-    WiFiClient ** _serverClients;
+    WiFiServer *_server = NULL;
+    WiFiClient **_serverClients;
+    bool _logActions;
 
-  protected:
+    IpCallbackFunction on_connect = NULL;
+    IpCallbackFunction on_disconnect = NULL;
+    CallbackFunction on_input = NULL;
+
+    virtual size_t write(uint8_t c);
+
+    virtual size_t write(uint8_t *buff, size_t len);
+
+    virtual void begin();
+
+    virtual void loop();
+
+    virtual void stop();
+
+    void _processClientConnection();
+
+    void _handleInput(char c);
+
+    void _handleClientInput();
+
+protected:
     String input = "";
     bool _lineMode = true;
 };
+
 #endif
 

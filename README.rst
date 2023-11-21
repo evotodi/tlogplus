@@ -42,6 +42,7 @@ It is used at the https://makerspaceleiden.nl/ for its door access: https://gith
 
 
 
-Define MDNS to use MDNS
+Define TLP_MDNS to use MDNS
 Define MQTT to enable MQTT and include knolleary/PubSubClient@~2.8 in project
+Define LOG_TELNET to log telnet interactions such as connect and disconnect of clients
 

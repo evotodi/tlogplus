@@ -1,24 +1,5 @@
-/* Copyright 2008, 2012-2022 Dirk-Willem van Gulik <dirkx(at)webweaving(dot)org>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *  
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * 
- * Library that provides a fanout, or T-flow; so that output or logs do 
- * not just got to the serial port; but also to a configurable mix of a
- * telnetserver, a webserver, syslog or MQTT.
- */
-
-#ifndef _H_LOG_TEE
-#define _H_LOG_TEE
+#ifndef _H_PLUS_LOG_TEE
+#define _H_PLUS_LOG_TEE
 
 #include <Arduino.h>
 #include <Print.h>
@@ -27,21 +8,15 @@
 #include <vector>
 #include <functional>
 
-#if defined(ESP32)
-#  include <WiFi.h>
-#  ifdef MDNS
-#    include <ESPmDNS.h>
+#  if defined(ESP32)
+#    include <WiFi.h>
+#  elif defined(ESP8266)
+#    include <ESP8266WiFi.h>
+#    include <WiFiUdp.h>
+#  else
+#    error "Must be ESP32 or ESP8266"
 #  endif
 #  define IDENTIFIER_GENERATOR (WiFi.macAddress())
-#elif defined(ESP8266)
-#  include <ESP8266WiFi.h>
-#  ifdef MDNS
-#    include <ESP8266mDNS.h>
-#  endif
-#  include <WiFiUdp.h>
-#  define IDENTIFIER_GENERATOR (WiFi.macAddress())
-#else
-#  error "Must be ESP32 or ESP8266"
 #endif
 
 #ifndef IDENTIFIER_GENERATOR
@@ -113,6 +88,21 @@ private:
     std::vector <std::shared_ptr<LOGBase>> handlers;
     bool _disableSerial = false;
 };
+
+// << operator
+enum _EndLineCode { endl };
+
+template <class T>
+inline LOGBase &operator<<(LOGBase &obj, T arg) {
+    obj.print(arg);
+    return obj;
+}
+
+template <class T>
+inline LOGBase &operator<<(LOGBase &obj, _EndLineCode arg) {
+    obj.println(arg);
+    return obj;
+}
 
 extern TLog Log;
 extern TLog Debug;
