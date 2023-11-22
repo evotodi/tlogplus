@@ -43,13 +43,21 @@ namespace TLogPlus {
 
         virtual void stop() { return; };
 
+        virtual void _disableStream(bool onOff) { return; };
+
     protected:
         String _identifier;
     };
 
     class TLog : public LOGBase {
     public:
-        void disableSerial(bool onoff) { _disableSerial = onoff; };
+        void disableSerial(bool onOff) { _disableSerial = onOff; };
+
+        void disableStreams(bool onOff) {
+            for (auto it = handlers.begin(); it != handlers.end(); ++it) {
+                (*it)->_disableStream(onOff);
+            }
+        };
 
         //void addPrintStream2(const LOGBase * _handler) { addPrintStream(std::make_shared<LOGBase>(_handler)); }
         void addPrintStream(const std::shared_ptr<LOGBase> &_handler) {
@@ -64,7 +72,6 @@ namespace TLogPlus {
             for (auto it = handlers.begin(); it != handlers.end(); ++it) {
                 (*it)->begin();
             }
-            // MDNS.begin();
         };
 
         virtual void loop() {
@@ -91,6 +98,7 @@ namespace TLogPlus {
     private:
         std::vector<std::shared_ptr<LOGBase>> handlers;
         bool _disableSerial = false;
+        bool _disableStreams = false;
     };
 
 // << operator
@@ -104,9 +112,8 @@ namespace TLogPlus {
         return obj;
     }
 
-    template<class T>
     inline LOGBase &operator<<(LOGBase &obj, _EndLineCode arg) {
-        obj.println(arg);
+        obj.println();
         return obj;
     }
 
