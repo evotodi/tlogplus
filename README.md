@@ -5,6 +5,7 @@ ESP8266/ESP32 Library that works like linux tee allowing you to log to multiple 
 * Author of original code: Dirk-Willem van Gulik <dirkx(at)webweaving(dot)org>
 * Released under Apache version 2.0
 * Telnet inspiration from https://github.com/LennartHennigs/ESPTelnet
+* Logging priorities inspiration from log4cpp
 
 ## Description
 Lets you sent logs to the Serial port, Telnet client, Syslog server, or a local web server that will scroll in a browser window.
