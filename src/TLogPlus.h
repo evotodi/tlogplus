@@ -32,7 +32,8 @@
 
 namespace TLogPlus {
     class LOGBase;
-    LOGBase& endl (LOGBase& os);
+
+    LOGBase &endl(LOGBase &os);
 
     class LOGBase : public Print {
     public:
@@ -58,16 +59,57 @@ namespace TLogPlus {
 
         Priority::Value getLevel();
 
-        void setNewline(const char * nl);
+        void setNewline(const char *nl);
 
-        const char * getNewLine();
+        const char *getNewLine();
 
         void showLevel(bool showLevel);
 
         bool getShowLevel();
 
+        friend LOGBase &endl(LOGBase &os);
+
+        LOGBase &operator<<(Priority::PriorityLevel priority);
+
+        typedef LOGBase &(*cspf)(LOGBase &);
+
+        LOGBase &operator<<(cspf);
+
+        LOGBase &operator<<(const std::string &t);
+
+        LOGBase &operator<<(const char *t);
+
+        LOGBase &operator<<(bool t);
+
+        LOGBase &operator<<(long t);
+
+        LOGBase &operator<<(unsigned long t);
+
+        LOGBase &operator<<(const double t);
+
+        LOGBase &operator<<(short t);
+
+        LOGBase &operator<<(int t);
+
+        LOGBase &operator<<(unsigned short t);
+
+        LOGBase &operator<<(unsigned int t);
+
+        LOGBase &operator<<(float t);
+
+        LOGBase &operator<<(const void *t);
+
+    protected:
+        String _identifier;
+        const Priority::Value _defaultLevel = Priority::NOTSET;
+        Priority::Value _level = _defaultLevel;
+        bool _showLevel = false;
+        Priority::Value _streamLevel = _defaultLevel;
+        std::stringstream *_buffer = nullptr;
+        const char *_newline = "\n";
+
         template<class T>
-        void printLevel(Priority::Value level, bool cr, T msg, ...) {
+        void _printLevel(Priority::Value level, bool cr, T msg, ...) {
             if (level > _level && level != Priority::NOTSET) {
                 return;
             }
@@ -88,51 +130,11 @@ namespace TLogPlus {
             }
         }
 
-        void flush();
-
-        friend LOGBase& endl (LOGBase& os);
-
-        LOGBase& operator<<(Priority::PriorityLevel priority);
-
-        typedef LOGBase& (*cspf) (LOGBase&);
-        LOGBase& operator<<(cspf);
-
-        LOGBase& operator<<(const std::string& t);
-
-        LOGBase& operator<<(const char* t);
-
-        LOGBase& operator<<(bool t);
-
-        LOGBase& operator<<(long t);
-
-        LOGBase& operator<<(unsigned long t);
-
-        LOGBase& operator<<(const double t);
-
-        LOGBase& operator<<(short t);
-
-        LOGBase& operator<<(int t);
-
-        LOGBase& operator<<(unsigned short t);
-
-        LOGBase& operator<<(unsigned int t);
-
-        LOGBase& operator<<(float t);
-
-        LOGBase& operator<<(const void* t);
-
-    protected:
-        String _identifier;
-        const Priority::Value _defaultLevel = Priority::NOTSET;
-        Priority::Value _level = _defaultLevel;
-        bool _showLevel = false;
-        Priority::Value _streamLevel = _defaultLevel;
-        std::stringstream* _buffer = nullptr;
-        const char * _newline = "\n";
-
     private:
         template<typename T>
         void _insertStream(T t);
+
+        void _flush();
     };
 
     class TLog : public LOGBase {
@@ -163,7 +165,7 @@ namespace TLogPlus {
          */
         template<class T, typename... Args>
         void fatal(T msg, Args... args) {
-            printLevel(Priority::FATAL, false, msg, args...);
+            _printLevel(Priority::FATAL, false, msg, args...);
         }
 
         /**
@@ -171,7 +173,7 @@ namespace TLogPlus {
          */
         template<class T, typename... Args>
         void fatalln(T msg, Args... args) {
-            printLevel(Priority::FATAL, true, msg, args...);
+            _printLevel(Priority::FATAL, true, msg, args...);
         }
 
         /**
@@ -186,7 +188,7 @@ namespace TLogPlus {
          */
         template<class T, typename... Args>
         void alert(T msg, Args... args) {
-            printLevel(Priority::ALERT, false, msg, args...);
+            _printLevel(Priority::ALERT, false, msg, args...);
         }
 
         /**
@@ -194,7 +196,7 @@ namespace TLogPlus {
          */
         template<class T, typename... Args>
         void alertln(T msg, Args... args) {
-            printLevel(Priority::ALERT, true, msg, args...);
+            _printLevel(Priority::ALERT, true, msg, args...);
         }
 
         /**
@@ -209,7 +211,7 @@ namespace TLogPlus {
          */
         template<class T, typename... Args>
         void critical(T msg, Args...args) {
-            printLevel(Priority::CRIT, false, msg, args...);
+            _printLevel(Priority::CRIT, false, msg, args...);
         }
 
         /**
@@ -217,7 +219,7 @@ namespace TLogPlus {
          */
         template<class T, typename... Args>
         void criticalln(T msg, Args...args) {
-            printLevel(Priority::CRIT, true, msg, args...);
+            _printLevel(Priority::CRIT, true, msg, args...);
         }
 
         /**
@@ -232,7 +234,7 @@ namespace TLogPlus {
          */
         template<class T, typename... Args>
         void error(T msg, Args...args) {
-            printLevel(Priority::ERROR, false, msg, args...);
+            _printLevel(Priority::ERROR, false, msg, args...);
         }
 
         /**
@@ -240,7 +242,7 @@ namespace TLogPlus {
          */
         template<class T, typename... Args>
         void errorln(T msg, Args...args) {
-            printLevel(Priority::ERROR, true, msg, args...);
+            _printLevel(Priority::ERROR, true, msg, args...);
         }
 
         /**
@@ -255,7 +257,7 @@ namespace TLogPlus {
          */
         template<class T, typename... Args>
         void warning(T msg, Args...args) {
-            printLevel(Priority::WARN, false, msg, args...);
+            _printLevel(Priority::WARN, false, msg, args...);
         }
 
         /**
@@ -263,7 +265,7 @@ namespace TLogPlus {
          */
         template<class T, typename... Args>
         void warningln(T msg, Args...args) {
-            printLevel(Priority::WARN, true, msg, args...);
+            _printLevel(Priority::WARN, true, msg, args...);
         }
 
         /**
@@ -276,17 +278,17 @@ namespace TLogPlus {
          * \param ... any number of variables
          * \return void
         */
-        template <class T, typename... Args>
+        template<class T, typename... Args>
         void notice(T msg, Args... args) {
-            printLevel(Priority::NOTICE, false, msg, args...);
+            _printLevel(Priority::NOTICE, false, msg, args...);
         }
 
         /**
          * Output same as notice with a carriage return ending
          */
-        template <class T, typename... Args>
+        template<class T, typename... Args>
         void noticeln(T msg, Args... args) {
-            printLevel(Priority::NOTICE, true, msg, args...);
+            _printLevel(Priority::NOTICE, true, msg, args...);
         }
 
         /**
@@ -299,17 +301,17 @@ namespace TLogPlus {
          * \param ... any number of variables
          * \return void
          */
-        template <class T, typename... Args>
+        template<class T, typename... Args>
         void info(T msg, Args... args) {
-            printLevel(Priority::INFO, false, msg, args...);
+            _printLevel(Priority::INFO, false, msg, args...);
         }
 
         /**
          * Output same as info with a carriage return ending
          */
-        template <class T, typename... Args>
+        template<class T, typename... Args>
         void infoln(T msg, Args... args) {
-            printLevel(Priority::INFO, true, msg, args...);
+            _printLevel(Priority::INFO, true, msg, args...);
         }
 
         /**
@@ -322,17 +324,17 @@ namespace TLogPlus {
          * \param ... any number of variables
          * \return void
          */
-        template <class T, typename... Args>
+        template<class T, typename... Args>
         void debug(T msg, Args... args) {
-            printLevel(Priority::DEBUG, false, msg, args...);
+            _printLevel(Priority::DEBUG, false, msg, args...);
         };
 
         /**
          * Output same as debug with a carriage return ending
          */
-        template <class T, typename... Args>
+        template<class T, typename... Args>
         void debugln(T msg, Args... args) {
-            printLevel(Priority::DEBUG, true, msg, args...);
+            _printLevel(Priority::DEBUG, true, msg, args...);
         }
 
     private:

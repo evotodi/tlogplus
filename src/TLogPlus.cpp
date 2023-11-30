@@ -7,7 +7,7 @@ namespace TLogPlus {
      * LOGBase
      */
     LOGBase::~LOGBase() {
-        flush();
+        _flush();
     }
 
     String LOGBase::identifier() {
@@ -33,7 +33,7 @@ namespace TLogPlus {
         return _newline;
     }
 
-    void LOGBase::setNewline(const char * nl) {
+    void LOGBase::setNewline(const char *nl) {
         _newline = nl;
     };
 
@@ -45,9 +45,9 @@ namespace TLogPlus {
         return _showLevel;
     }
 
-    void LOGBase::flush() {
+    void LOGBase::_flush() {
         if (_buffer) {
-            printLevel(_streamLevel, true, _buffer->str().c_str());
+            _printLevel(_streamLevel, true, _buffer->str().c_str());
             delete _buffer;
             _buffer = nullptr;
         }
@@ -58,7 +58,7 @@ namespace TLogPlus {
     void LOGBase::_insertStream(T t) {
         if (getLevel() != Priority::NOTSET) {
             if (!_buffer) {
-                if(!(_buffer = new std::stringstream)) {
+                if (!(_buffer = new std::stringstream)) {
                     // XXX help help help
                 }
             }
@@ -72,7 +72,7 @@ namespace TLogPlus {
 
     LOGBase &endl(LOGBase &os) {
         if (os._buffer) {
-            os.flush();
+            os._flush();
         }
 
         return os;
